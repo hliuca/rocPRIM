@@ -253,10 +253,11 @@ TYPED_TEST(RocprimDeviceFindFirstOfTests, FindFirstOf)
                 HIP_CHECK(
                     test_common_utils::hipMallocHelper(&d_temp_storage, temp_storage_size_bytes));
 
-                hipGraph_t graph;
+                test_utils::GraphHelper gHelper;
+
                 if(TestFixture::use_graphs)
                 {
-                    graph = test_utils::createGraphHelper(stream);
+                    gHelper.startStreamCapture(stream);
                 }
 
                 // Run
@@ -271,10 +272,9 @@ TYPED_TEST(RocprimDeviceFindFirstOfTests, FindFirstOf)
                                                          stream,
                                                          debug_synchronous));
 
-                hipGraphExec_t graph_instance;
                 if(TestFixture::use_graphs)
                 {
-                    graph_instance = test_utils::endCaptureGraphHelper(graph, stream, true, true);
+                    gHelper.createAndLaunchGraph(stream);
                 }
 
                 HIP_CHECK(hipGetLastError());
@@ -302,7 +302,7 @@ TYPED_TEST(RocprimDeviceFindFirstOfTests, FindFirstOf)
 
                 if(TestFixture::use_graphs)
                 {
-                    test_utils::cleanupGraphHelper(graph, graph_instance);
+                    gHelper.cleanupGraphHelper();
                     HIP_CHECK(hipStreamDestroy(stream));
                 }
             }
